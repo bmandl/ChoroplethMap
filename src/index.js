@@ -11,6 +11,15 @@ const svg = d3.select("#map").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+const lScale = d3.scaleLinear().rangeRound([600, 860]);
+const lAxis = d3.axisBottom(lScale)
+    .tickSize(13)
+    .tickFormat(x=>Math.round(x)+'%');
+
+const legend = svg.append("g")
+    .attr("id", "legend")
+    .append("g");
+
 const tooltip = d3.select(".container").append("div")
     .attr("id", "tooltip")
     .style('opacity', 0);
@@ -27,6 +36,24 @@ Promise.all([d3.json(COUNTY_FILE), d3.json(EDUCATION_FILE)]).then((data) => {
     let min = d3.min(arr);
     color.domain(d3.range(min, max, (max - min) / 8));
 
+    lAxis.tickValues(color.domain());
+    lScale.domain([min, max]);
+
+    legend.selectAll("rect")
+        .data(color.range().map(d => {
+            d = color.invertExtent(d);
+            if (d[0] == null) d[0] = lScale.domain()[0];
+            if (d[1] == null) d[1] = lScale.domain()[1];
+            return d;
+        }))
+        .enter().append("rect")
+        .attr("height", 8)
+        .attr("x", d => lScale(d[0]))
+        .attr("width", d => lScale(d[1]) - lScale(d[0]))
+        .attr("fill", d => color(d[0]));
+
+    legend.call(lAxis);
+
     svg.append("g")
         .attr("class", "counties")
         .selectAll("path")
@@ -40,8 +67,8 @@ Promise.all([d3.json(COUNTY_FILE), d3.json(EDUCATION_FILE)]).then((data) => {
             let tone = education.find(obj => obj.fips === d.id)["bachelorsOrHigher"];
             return color(tone);
         })
-        .on("mouseover", d => {   
-            tooltip.attr("data-education",event.currentTarget.attributes["data-education"].value);
+        .on("mouseover", d => {
+            tooltip.attr("data-education", event.currentTarget.attributes["data-education"].value);
             tooltip.transition()
                 .duration(100)
                 .style('opacity', 0.95);
