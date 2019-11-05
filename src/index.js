@@ -14,7 +14,7 @@ const svg = d3.select("#map").append("svg")
 const lScale = d3.scaleLinear().rangeRound([600, 860]);
 const lAxis = d3.axisBottom(lScale)
     .tickSize(13)
-    .tickFormat(x=>Math.round(x)+'%');
+    .tickFormat(x => Math.round(x) + '%');
 
 const legend = svg.append("g")
     .attr("id", "legend")
