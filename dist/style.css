@@ -1,5 +1,7 @@
-.counties :hover {
-    fill: red;
+.county:hover {
+    stroke: black;
+    stroke-width: 1.3px;
+    stroke-dasharray: 0;
   }
   
   .county-borders {
@@ -10,3 +12,20 @@
     stroke-linecap: round;
     pointer-events: none;
   }
+
+  #tooltip {
+    font-size: 0.8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 5px 20px;
+    background: #6e91a1;
+    position: absolute;
+    border-radius: 3px;
+    /*width: 200px;*/
+    height: 30px;
+    -webkit-box-shadow: 1px 1px 10px -1px rgba(0,0,0,1);
+    -moz-box-shadow: 1px 1px 10px -1px rgba(0,0,0,1);
+    box-shadow: 1px 1px 10px -1px rgba(0,0,0,1);
+}

@@ -11,6 +11,10 @@ const svg = d3.select("#map").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+const tooltip = d3.select(".container").append("div")
+    .attr("id", "tooltip")
+    .style('opacity', 0);
+
 var path = d3.geoPath();
 
 Promise.all([d3.json(COUNTY_FILE), d3.json(EDUCATION_FILE)]).then((data) => {
@@ -21,12 +25,10 @@ Promise.all([d3.json(COUNTY_FILE), d3.json(EDUCATION_FILE)]).then((data) => {
     let arr = education.map(obj => obj["bachelorsOrHigher"]);
     let max = d3.max(arr);
     let min = d3.min(arr);
-    color.domain(d3.range(min,max,(max-min)/8));   
-
-    console.log(color.domain());
+    color.domain(d3.range(min, max, (max - min) / 8));
 
     svg.append("g")
-        .attr("class", "counties")        
+        .attr("class", "counties")
         .selectAll("path")
         .data(topojson.feature(counties, counties.objects.counties).features)
         .enter().append("path")
@@ -34,10 +36,26 @@ Promise.all([d3.json(COUNTY_FILE), d3.json(EDUCATION_FILE)]).then((data) => {
         .attr("d", path)
         .attr("data-fips", d => d.id)
         .attr("data-education", d => education.find(obj => obj.fips === d.id)["bachelorsOrHigher"])
-        .style("fill",d => {
+        .style("fill", d => {
             let tone = education.find(obj => obj.fips === d.id)["bachelorsOrHigher"];
             return color(tone);
         })
+        .on("mouseover", d => {   
+            tooltip.attr("data-education",event.currentTarget.attributes["data-education"].value);
+            tooltip.transition()
+                .duration(100)
+                .style('opacity', 0.95);
+            tooltip.html(`${education.find(el => el.fips === d.id)["area_name"]}, 
+            ND: ${education.find(el => el.fips === d.id)["bachelorsOrHigher"]}`)
+                .style('left', `${event.clientX}px`)
+                .style('top', `${event.clientY}px`)
+                .style('transform', 'translateX(30px)');
+        })
+        .on('mouseout', () => {
+            tooltip.transition()
+                .duration(100)
+                .style('opacity', 0);
+        });
 
     svg.append("path")
         .attr("class", "county-borders")
